@@ -1,0 +1,31 @@
+{
+    "name": "goosapi/goosapi",
+    "type": "library",
+    "description": "Goosapi Framework, create easy web api and services",
+    "keywords": ["api","framework","php","easy", "simple", "simplify"],
+    "homepage": "https://github.com/supanut-pgs/php-goosapi",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Supanut Panyagosa",
+            "email": "supanut.pgs@gmail.com",
+            "role": "Creator"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+		"monolog/monolog": "^2.0",
+        "phpunit/phpunit": "3.7.*",
+        "larapack/dd": "1.*",
+        "facebook/graph-sdk": "^5.7"
+    },
+    "autoload":{
+        "files" : [
+            "src/Goosapi/Global.php"
+        ],
+    	"psr-4": {
+            "Goosapi\\":"src/Goosapi",
+            "":"src/App"
+        }
+    }
+}
