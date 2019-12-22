@@ -2,7 +2,14 @@
     "name": "goosapi/goosapi",
     "type": "library",
     "description": "Goosapi Framework, create easy web api and services",
-    "keywords": ["api","framework","php","easy", "simple", "simplify"],
+    "keywords": [
+        "api",
+        "framework",
+        "php",
+        "easy",
+        "simple",
+        "simplify"
+    ],
     "homepage": "https://github.com/supanut-pgs/php-goosapi",
     "license": "MIT",
     "authors": [
