@@ -100,9 +100,14 @@ class Router implements IRouter, IDumper
     {
         $this->pushDumb("OPTION", $path, $obj, $provider);
 
-        $this->_routing_dump[] = ["OPTIONS", $path, $obj];
-
         if ($_SERVER['REQUEST_METHOD'] != "OPTION") return;
+
+        $this->_route($path, $obj, $provider);
+    }
+
+    public function call($path, $obj, CredentialProvider $provider = null)
+    {
+        $this->pushDumb("*", $path, $obj, $provider);
 
         $this->_route($path, $obj, $provider);
     }
@@ -133,7 +138,6 @@ class Router implements IRouter, IDumper
         
             $path = $tmp_path;
             $methods = explode("|", $value);
-
 
             // d($path);
             // d($methods);
@@ -171,6 +175,9 @@ class Router implements IRouter, IDumper
             {
                 switch ($method)
                 {
+                    case "*":
+                        $this->call($path, $obj, $provider);
+                    break;
                     case "GET":
                         $this->get($path, $obj, $provider);
                     break;

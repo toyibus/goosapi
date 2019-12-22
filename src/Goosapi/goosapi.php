@@ -91,6 +91,11 @@ class goosapi implements IRouter
         $this->router->option($path, $obj, $provider);
     }
 
+    public function call($path, $obj, CredentialProvider $provider = null)
+    {
+        $this->router->call($path, $obj, $provider);
+    }
+
     // Router Functions
     public function group($path, $function)
     {
@@ -102,17 +107,6 @@ class goosapi implements IRouter
         // $this->credential = $credential;
         $this->router->route($path, $obj, $routing, $provider);
     }
-
-    // public function verify(ICredentialProvider $provider, $function)
-    // {
-    //     $provider->verify($this);
-    //     $function($provider->getData($this));
-    // }
-
-    // public function getCredential()
-    // {
-    //     return $this->credential;
-    // }
 
     public function response()
     {

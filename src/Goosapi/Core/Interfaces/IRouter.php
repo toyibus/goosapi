@@ -13,6 +13,9 @@ interface IRouter
     public function patch   ($path, $obj, CredentialProvider $provider = null);
     public function put     ($path, $obj, CredentialProvider $provider = null);
     public function option  ($path, $obj, CredentialProvider $provider = null);
+    
+    // All method allows 
+    public function call    ($path, $obj, CredentialProvider $provider = null);
 
     // Router Functions
     public function group   ($path, $function);
