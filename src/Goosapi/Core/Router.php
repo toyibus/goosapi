@@ -1,6 +1,7 @@
 <?php 
 namespace Goosapi\Core;
 
+use Closure;
 use Goosapi\Core\Interfaces\IDumper;
 use Goosapi\Core\Interfaces\IRouter;
 use Goosapi\goosapi;
@@ -17,17 +18,19 @@ class Router implements IRouter, IDumper
     {
         $this->_api             = $api;
         $this->_routing_dump    = [];
-        $_SERVER['REDIRECT_QUERY_STRING'] = ltrim($_SERVER['REDIRECT_QUERY_STRING'], "args=");
+        // dd( $_SERVER['REDIRECT_QUERY_STRING']);
+        $_SERVER['REDIRECT_QUERY_STRING'] = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
+        // dd( $_SERVER['REDIRECT_QUERY_STRING']);
     }
 
     private function pushDumb($method, $path, $obj, CredentialProvider $provider = null)
     {
         $path = StringUtils::replaceFirst("/", "/".$this->group_path."/", $path);
         $path = str_replace("//", "/", $path);
-        $this->_routing_dump["$method: $path"] = [
-            // "METHOD"        => $method,        
-            // "PATH"          => $path,
-            "OBJECT"        => $obj,
+        $this->_routing_dump[] = [
+            "METHOD"        => $method,        
+            "PATH"          => $path,
+            "OBJECT"        => $obj instanceof Closure ? "Closure" : $obj,
             "PROVIDER"      => $provider,
         ];
     }
@@ -35,16 +38,18 @@ class Router implements IRouter, IDumper
     public function dump()
     {
         //ksort($this->_routing_dump);
-        dd($this->_routing_dump);
+        return $this->_routing_dump;
     }
 
     /* Implement function from IRouter */
     // Http Restful Type
     public function get($path, $obj, CredentialProvider $provider = null)
     {
+        // dd($_SERVER['REDIRECT_QUERY_STRING']);
         $this->pushDumb("GET", $path, $obj, $provider);
-
+        
         if ($_SERVER['REQUEST_METHOD'] != "GET") return;
+
         $this->_route($path, $obj, $provider);
     }
 
@@ -98,13 +103,9 @@ class Router implements IRouter, IDumper
     // Router Functions
     public function group($path, $function)
     {
-        $this->group_path =  ltrim($path, '/');
-        // $path = ltrim($path, '/');
-        // $query =  ltrim($_SERVER['REDIRECT_QUERY_STRING'], "args=");
-
-        // if (!StringUtils::startWith($query, $path)) return;
-        // $_SERVER['REDIRECT_QUERY_STRING'] = str_replace($path."/", "", $_SERVER['REDIRECT_QUERY_STRING']);
-        
+        // $this->group_path =  ltrim($path, '/');
+        $this->group_path =  StringUtils::replaceFirst("/", "", $path);
+     
         $function($this->_api);
         $this->group_path = "";
     }
@@ -201,10 +202,15 @@ class Router implements IRouter, IDumper
         }
        
         $query  = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
-       
-        if (!StringUtils::startWith($query, $this->group_path)) return;
-
-        $query = str_replace($this->group_path."/", "", $query);
+        
+        if ($this->group_path)
+        {
+            // dd("Yo");
+            if (!StringUtils::startWith($query, $this->group_path)) return;
+            $query = str_replace($this->group_path."/", "", $query);
+        }
+           
+      
         // $query  = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
         if (strpos($query, "&"))
             $query = substr($query, 0, strpos($query, "&"));
@@ -226,7 +232,7 @@ class Router implements IRouter, IDumper
         // $func_name = array_shift($paths);
         // if (!empty($paths[0])) $func_name = array_shift($paths);
 
-        $func_name = empty($paths[0]) ? "" : array_shift($paths);
+        $func_name = empty($paths[0]) ? array_shift($paths) : array_shift($paths);
 
         // d("Paths -> ", $paths);
         // d("Query -> ", $query);
