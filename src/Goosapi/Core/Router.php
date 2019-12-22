@@ -24,8 +24,8 @@ class Router implements IRouter, IDumper
     {
         $path = StringUtils::replaceFirst("/", "/".$this->group_path."/", $path);
         $path = str_replace("//", "/", $path);
-        $this->_routing_dump[$path] = [
-            "METHOD"        => $method,
+        $this->_routing_dump["$method: $path"] = [
+            // "METHOD"        => $method,        
             // "PATH"          => $path,
             "OBJECT"        => $obj,
             "PROVIDER"      => $provider,
@@ -34,6 +34,7 @@ class Router implements IRouter, IDumper
 
     public function dump()
     {
+        //ksort($this->_routing_dump);
         dd($this->_routing_dump);
     }
 
