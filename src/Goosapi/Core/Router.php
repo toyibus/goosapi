@@ -11,11 +11,25 @@ class Router implements IRouter, IDumper
 {
     private $_api;
     private $_routing_dump; 
+    private $group_path;
 
     public function __construct(goosapi $api = null)
     {
         $this->_api             = $api;
         $this->_routing_dump    = [];
+        $_SERVER['REDIRECT_QUERY_STRING'] = ltrim($_SERVER['REDIRECT_QUERY_STRING'], "args=");
+    }
+
+    private function pushDumb($method, $path, $obj, CredentialProvider $provider = null)
+    {
+        $path = StringUtils::replaceFirst("/", "/".$this->group_path."/", $path);
+        $path = str_replace("//", "/", $path);
+        $this->_routing_dump[$path] = [
+            "METHOD"        => $method,
+            // "PATH"          => $path,
+            "OBJECT"        => $obj,
+            "PROVIDER"      => $provider,
+        ];
     }
 
     public function dump()
@@ -27,7 +41,7 @@ class Router implements IRouter, IDumper
     // Http Restful Type
     public function get($path, $obj, CredentialProvider $provider = null)
     {
-        $this->_routing_dump[] = ["GET", $path, $obj];
+        $this->pushDumb("GET", $path, $obj, $provider);
 
         if ($_SERVER['REQUEST_METHOD'] != "GET") return;
         $this->_route($path, $obj, $provider);
@@ -35,7 +49,7 @@ class Router implements IRouter, IDumper
 
     public function post($path, $obj, CredentialProvider $provider = null)
     {
-        $this->_routing_dump[] = ["POST", $path, $obj];
+        $this->pushDumb("POST", $path, $obj, $provider);
 
         if ($_SERVER['REQUEST_METHOD'] != "POST") return;
 
@@ -44,7 +58,7 @@ class Router implements IRouter, IDumper
 
     public function delete($path, $obj, CredentialProvider $provider = null)
     {
-        $this->_routing_dump[] = ["DELETE", $path, $obj];
+        $this->pushDumb("DELETE", $path, $obj, $provider);
 
         if ($_SERVER['REQUEST_METHOD'] != "DELETE") return;
 
@@ -53,7 +67,7 @@ class Router implements IRouter, IDumper
 
     public function patch($path, $obj, CredentialProvider $provider = null)
     {
-        $this->_routing_dump[] = ["PATCH", $path, $obj];
+        $this->pushDumb("PATCH", $path, $obj, $provider);
 
         if ($_SERVER['REQUEST_METHOD'] != "PATCH") return;
 
@@ -62,7 +76,7 @@ class Router implements IRouter, IDumper
 
     public function put($path, $obj, CredentialProvider $provider = null)
     {
-        $this->_routing_dump[] = ["PUT", $path, $obj];
+        $this->pushDumb("PUT", $path, $obj, $provider);
 
         if ($_SERVER['REQUEST_METHOD'] != "PUT") return;
 
@@ -71,6 +85,8 @@ class Router implements IRouter, IDumper
 
     public function option($path, $obj, CredentialProvider $provider = null)
     {
+        $this->pushDumb("OPTION", $path, $obj, $provider);
+
         $this->_routing_dump[] = ["OPTIONS", $path, $obj];
 
         if ($_SERVER['REQUEST_METHOD'] != "OPTION") return;
@@ -81,13 +97,15 @@ class Router implements IRouter, IDumper
     // Router Functions
     public function group($path, $function)
     {
-        $path = ltrim($path, '/');
-        $query =  ltrim($_SERVER['REDIRECT_QUERY_STRING'], "args=");
+        $this->group_path =  ltrim($path, '/');
+        // $path = ltrim($path, '/');
+        // $query =  ltrim($_SERVER['REDIRECT_QUERY_STRING'], "args=");
 
-        if (!StringUtils::startWith($query, $path)) return;
-        $_SERVER['REDIRECT_QUERY_STRING'] = str_replace($path."/", "", $_SERVER['REDIRECT_QUERY_STRING']);
+        // if (!StringUtils::startWith($query, $path)) return;
+        // $_SERVER['REDIRECT_QUERY_STRING'] = str_replace($path."/", "", $_SERVER['REDIRECT_QUERY_STRING']);
         
         $function($this->_api);
+        $this->group_path = "";
     }
 
     public function route($path, $obj, $routing, CredentialProvider $provider = null)
@@ -181,8 +199,12 @@ class Router implements IRouter, IDumper
             // d($class);
         }
        
-       
         $query  = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
+       
+        if (!StringUtils::startWith($query, $this->group_path)) return;
+
+        $query = str_replace($this->group_path."/", "", $query);
+        // $query  = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
         if (strpos($query, "&"))
             $query = substr($query, 0, strpos($query, "&"));
        
