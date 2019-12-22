@@ -1,6 +1,7 @@
 <?php
 namespace Goosapi;
 
+use Goosapi\Core\CredentialProvider;
 use Goosapi\Core\Interfaces\ICredentialProvider;
 use Goosapi\Core\Interfaces\IRouter;
 use Goosapi\Core\Request;
@@ -54,34 +55,40 @@ class goosapi implements IRouter
 
     /* Implement function from IRouter */
     // Http Restful Type
-    public function get($path, $obj)
+
+    public function router()
     {
-        $this->router->get($path, $obj);
+        return $this->router;
     }
 
-    public function post($path, $obj)
+    public function get($path, $obj, CredentialProvider $provider = null)
     {
-        $this->router->post($path, $obj);
+        $this->router->get($path, $obj, $provider);
     }
 
-    public function delete($path, $obj)
+    public function post($path, $obj, CredentialProvider $provider = null)
     {
-        $this->router->delete($path, $obj);
+        $this->router->post($path, $obj, $provider);
     }
 
-    public function patch($path, $obj)
+    public function delete($path, $obj, CredentialProvider $provider = null)
     {
-        $this->router->patch($path, $obj);
+        $this->router->delete($path, $obj, $provider);
     }
 
-    public function put($path, $obj)
+    public function patch($path, $obj, CredentialProvider $provider = null)
     {
-        $this->router->put($path, $obj);
+        $this->router->patch($path, $obj, $provider);
     }
 
-    public function option($path, $obj)
+    public function put($path, $obj, CredentialProvider $provider = null)
     {
-        $this->router->option($path, $obj);
+        $this->router->put($path, $obj, $provider);
+    }
+
+    public function option($path, $obj, CredentialProvider $provider = null)
+    {
+        $this->router->option($path, $obj, $provider);
     }
 
     // Router Functions
@@ -90,22 +97,22 @@ class goosapi implements IRouter
         $this->router->group($path, $function);
     }
 
-    public function route($path, $obj, $routing, $credential = [])
+    public function route($path, $obj, $routing, CredentialProvider $provider = null)
     {
-        $this->credential = $credential;
-        $this->router->route($path, $obj, $routing);
+        // $this->credential = $credential;
+        $this->router->route($path, $obj, $routing, $provider);
     }
 
-    public function verify(ICredentialProvider $provider, $function)
-    {
-        $provider->verify($this);
-        $function($provider->getData($this));
-    }
+    // public function verify(ICredentialProvider $provider, $function)
+    // {
+    //     $provider->verify($this);
+    //     $function($provider->getData($this));
+    // }
 
-    public function getCredential()
-    {
-        return $this->credential;
-    }
+    // public function getCredential()
+    // {
+    //     return $this->credential;
+    // }
 
     public function response()
     {

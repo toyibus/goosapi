@@ -12,12 +12,12 @@ abstract class CredentialProvider implements ICredentialProvider
         $this->credential = [];    
     }
 
-    protected function setCredential($key, $value)
+    public function setCredential($key, $value)
     {
         $this->credential[$key] = $value;
     }
 
-    public function getData(goosapi $api)
+    public function getCredential()
     {
         return $this->credential;
     }

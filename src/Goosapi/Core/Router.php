@@ -1,61 +1,81 @@
 <?php 
 namespace Goosapi\Core;
 
+use Goosapi\Core\Interfaces\IDumper;
 use Goosapi\Core\Interfaces\IRouter;
 use Goosapi\goosapi;
 use Goosapi\Utils\ArrayUtils;
 use Goosapi\Utils\StringUtils;
 
-class Router implements IRouter
+class Router implements IRouter, IDumper
 {
     private $_api;
+    private $_routing_dump; 
+
     public function __construct(goosapi $api = null)
     {
-        $this->_api = $api;
+        $this->_api             = $api;
+        $this->_routing_dump    = [];
+    }
+
+    public function dump()
+    {
+        dd($this->_routing_dump);
     }
 
     /* Implement function from IRouter */
     // Http Restful Type
-    public function get($path, $obj)
+    public function get($path, $obj, CredentialProvider $provider = null)
     {
-        if ($_SERVER['REQUEST_METHOD'] != "GET") return;
+        $this->_routing_dump[] = ["GET", $path, $obj];
 
-        $this->_route($path, $obj);
+        if ($_SERVER['REQUEST_METHOD'] != "GET") return;
+        $this->_route($path, $obj, $provider);
     }
 
-    public function post($path, $obj)
+    public function post($path, $obj, CredentialProvider $provider = null)
     {
+        $this->_routing_dump[] = ["POST", $path, $obj];
+
         if ($_SERVER['REQUEST_METHOD'] != "POST") return;
 
-        $this->_route($path, $obj);
+        $this->_route($path, $obj, $provider);
     }
 
-    public function delete($path, $obj)
+    public function delete($path, $obj, CredentialProvider $provider = null)
     {
+        $this->_routing_dump[] = ["DELETE", $path, $obj];
+
         if ($_SERVER['REQUEST_METHOD'] != "DELETE") return;
 
-        $this->_route($path, $obj);
+        $this->_route($path, $obj, $provider);
     }
 
-    public function patch($path, $obj)
+    public function patch($path, $obj, CredentialProvider $provider = null)
     {
+        $this->_routing_dump[] = ["PATCH", $path, $obj];
+
         if ($_SERVER['REQUEST_METHOD'] != "PATCH") return;
 
-        $this->_route($path, $obj);
+        $this->_route($path, $obj, $provider);
     }
 
-    public function put($path, $obj)
+    public function put($path, $obj, CredentialProvider $provider = null)
     {
+        $this->_routing_dump[] = ["PUT", $path, $obj];
+
         if ($_SERVER['REQUEST_METHOD'] != "PUT") return;
 
-        $this->_route($path, $obj);
+        $this->_route($path, $obj, $provider);
     }
 
-    public function option($path, $obj)
+    public function option($path, $obj, CredentialProvider $provider = null)
     {
+        $this->_routing_dump[] = ["OPTIONS", $path, $obj];
+
         if ($_SERVER['REQUEST_METHOD'] != "OPTION") return;
 
-        $this->_route($path, $obj);
+        $this->_route($path, $obj, $provider);
     }
 
     // Router Functions
@@ -70,7 +90,7 @@ class Router implements IRouter
         $function($this->_api);
     }
 
-    public function route($path, $obj, $routing)
+    public function route($path, $obj, $routing, CredentialProvider $provider = null)
     {
         if ($path=="/") $path="";
         // d("------------------------------------------------");
@@ -125,30 +145,29 @@ class Router implements IRouter
                 switch ($method)
                 {
                     case "GET":
-                        $this->get($path, $obj);
+                        $this->get($path, $obj, $provider);
                     break;
                     case "POST":
-                        $this->post($path, $obj);
+                        $this->post($path, $obj, $provider);
                     break;
                     case "PUT":
-                        $this->put($path, $obj);
+                        $this->put($path, $obj, $provider);
                     break;
                     case "PATCH":
-                        $this->patch($path, $obj);
+                        $this->patch($path, $obj, $provider);
                     break;
                     case "DELETE":
-                        $this->delete($path, $obj);
+                        $this->delete($path, $obj, $provider);
                     break;
                     case "OPTION":
-                        $this->option($path, $obj);
+                        $this->option($path, $obj, $provider);
                     break;
                 }
             }
         }
     }
 
-
-    private function _route($path, $obj)
+    private function _route($path, $obj, CredentialProvider $provider = null)
     {
         // d("---------------");
         // d("Path : $path");
@@ -202,6 +221,21 @@ class Router implements IRouter
         // d($payload);
         
         array_unshift($payload, $this->_api);
+
+        $credential = null;
+        if ($provider)
+        {
+            $provider->verify($this->_api);
+            $credential = $provider->getCredential();
+        }
+
+        if ($obj instanceof ApiController)
+        {
+            $obj->setCredential($credential);
+            $obj->onLoad($this->_api, $credential);
+        }
+        
+            
         if ($func_name)
             call_user_func_array(array($obj, $func_name), $payload); 
         else
