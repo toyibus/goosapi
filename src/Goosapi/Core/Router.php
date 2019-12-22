@@ -25,12 +25,19 @@ class Router implements IRouter, IDumper
 
     private function pushDumb($method, $path, $obj, CredentialProvider $provider = null)
     {
-        $path = StringUtils::replaceFirst("/", "/".$this->group_path."/", $path);
-        $path = str_replace("//", "/", $path);
+        $path   = StringUtils::replaceFirst("/", "/".$this->group_path."/", $path);
+        $path   = str_replace("//", "/", $path);
+        $paths  = explode("/", $path);
+
+        $paths      = explode("/", $path);
+        $function   = StringUtils::startWith($paths[0], "/") ? $path : array_shift($paths);
+        $path       = implode("/", $paths);
+
         $this->_routing_dump[] = [
             "METHOD"        => $method,        
             "PATH"          => $path,
             "OBJECT"        => $obj instanceof Closure ? "Closure" : $obj,
+            "CALL_FUNCTION" => $function,
             "PROVIDER"      => $provider,
         ];
     }
