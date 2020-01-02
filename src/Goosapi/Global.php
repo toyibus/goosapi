@@ -51,7 +51,7 @@ function findWithKey($file, $key, $default = "")
     foreach ($contents as $c)
     {
         if (!$c) continue;
-        $line = explode('=', $c);
+        $line = explode('=', $c, 2);
    
         if ($line[0]==$key) return $line[1];
     }
