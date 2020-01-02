@@ -28,7 +28,8 @@ class goosapi implements IRouter
     {
         // ------------------ Allow CORs ----------------------
         if (!$allows) $allows = "*";
-        $allows = implode(",", $allows);
+        if (gettype($allows) == "array") $allows = implode(",", $allows);
+   
         if (isset($_SERVER['HTTP_ORIGIN'])) 
         {
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
