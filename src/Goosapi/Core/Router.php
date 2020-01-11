@@ -19,6 +19,7 @@ class Router implements IRouter, IDumper
         $this->_api             = $api;
         $this->_routing_dump    = [];
         // dd( $_SERVER['REDIRECT_QUERY_STRING']);
+        if (empty($_SERVER['REDIRECT_QUERY_STRING'])) $_SERVER['REDIRECT_QUERY_STRING'] = "";
         $_SERVER['REDIRECT_QUERY_STRING'] = str_replace("args=", "", $_SERVER['REDIRECT_QUERY_STRING']);
         // dd( $_SERVER['REDIRECT_QUERY_STRING']);
     }
