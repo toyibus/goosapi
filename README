@@ -1,0 +1,27 @@
+/* Routing Example */
+
+// http://localhost/goosapi/me/echo/13/toy?a=1
+// $api->get("/me/echo/:id/:name", function($api, $id, $name) {  
+//     $api->response()->submit([
+//         "id"  => $id,
+//         "name"  => $name,
+//     ]);
+// });
+
+
+// http://localhost/goosapi/show/13/test?a=1
+// $api->get("show/:id/:title", "\Goosapi\Dumb\Post");
+
+// http://localhost/goosapi/post/50?a=1
+// $api->get("list/post/:id", "\Goosapi\Dumb\Post");
+
+// $api->group("/v1", function($api) {
+//     $api->route("/post", "\API\Post", [
+//         "/list"         => "POST|OPTION", // /post/list
+//         "/read/:id"     => "GET", // /post/read/:id
+//         "list"          => "GET", // (list)/post
+//         "list/:id"      => "GET", // (list)/post/:id/ 
+//         "list/:id/name" => "GET", // (list)/post/:id/name 
+//     ]);
+    
+// });
